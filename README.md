@@ -3,6 +3,7 @@
 ## Azure Portal
 <details>
 <summary>Configure APP</summary>
+  
 1. open service Azure Active Directory
 1. in Manage section find APP registration
 1. click on New registration
