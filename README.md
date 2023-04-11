@@ -1,4 +1,17 @@
 # AzureAuth
+
+## Azure Portal
+<details>
+<summary>Configure APP</summary>
+1. open service Azure Active Directory
+1. in Manage section find APP registration
+1. click on New registration
+
+![image](https://user-images.githubusercontent.com/11536139/231072183-e44da553-01e1-45a3-8362-dd5e393fa597.png)
+
+
+</details>
+
 ### ToDo 
 1. azure portal - configure app
 1. azure portal - create user
@@ -15,3 +28,5 @@
 ### what we can do more
 1. certificate
 1. 
+
+
