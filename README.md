@@ -77,6 +77,12 @@ builder.Services
     });
 ```
 
+Now add middelware:
+```
+app.UseAuthorization();
+app.UseAuthentication();
+```
+
 To veryfied this we need add some user to AD. In Azure Active Directoryt in `Manage` section select `Users`
 
 ![image](https://user-images.githubusercontent.com/11536139/232052953-7ac54784-e82e-4be8-b2ac-80e84819f1da.png)
@@ -119,122 +125,7 @@ I will be used PostMan and I add how configure this, but you can used any others
 </details>
 
 
-
-## Requirments
-### Azure Portal
-<details>
-  <summary>Configure APP</summary>
-
-  1. open service `Azure Active Directory`
-  2. in `Manage` section find `APP registration`
-  3. click on New registration
-
-  ![image](https://user-images.githubusercontent.com/11536139/231072183-e44da553-01e1-45a3-8362-dd5e393fa597.png)
-
-  4. in Manage section select `Expose an API`
-  5. Set `Application ID URI`
-  
-  ![image](https://user-images.githubusercontent.com/11536139/231495931-f1b6cca7-f5de-4b40-94d9-f144cd1d760e.png)
-
-  6. in `Manage` goto `Certificates & secrets`
-  7. add new `Client secret`, save this
-  
-</details>
-<details>
-  <summary>Create user</summary>
-  
-  1. open service Azure Active Directory
-  2. in Manage section find users
-  3. click on New user -> Create new user
-  
-  ![image](https://user-images.githubusercontent.com/11536139/231476246-db4cbba0-a557-4a44-9f56-ca0b3d8001d8.png)
-  
-  4. fill form and create, don't forgot save password ;-) 
-  
-  ![image](https://user-images.githubusercontent.com/11536139/231476831-28eed144-b90e-471d-9826-f73c7735b1c5.png)
-
-</details>
-
-### Rest client
-We will used this to generate token and send request, I will be used PostMan.
-
-
-
-## Web API
-Create Web API, remove example endpoint, and add for now only two endpoint to veryfied authorization:
-  ```
-var builder = WebApplication.CreateBuilder(args);
-
-var app = builder.Build();
-
-app.UseHttpsRedirection();
-
-app.MapGet("/no-auth", () => Results.Ok());
-app.MapGet("/auth", () => Results.Ok()).RequireAuthorization();
-
-app.Run();
-  ```
-When we send request to `no-auth` we received 200, but when we send to `auth` we received 500
-
-![image](https://user-images.githubusercontent.com/11536139/231489913-90380c0d-474d-45b9-a025-299c7cfe1af3.png)
-
-This is fine, because we don't setup authorization. We need install package:
-Microsoft.AspNetCore.Authentication
-Microsoft.AspNetCore.Authentication.JwtBearer
-
-For builder service we need configure middelware for authorization
-```
-builder.Services
-    .AddAuthorization()
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var tenantId = "31dc6402-0301-47e7-906b-c64a780a7311";
-        var audience = new List<string> { "api://3245fc3f-917a-4926-a3b6-778ce877047b" };
-
-        var authority = string.Format(CultureInfo.InvariantCulture, "https://login.microsoftonline.com/{0}", tenantId);
-
-        var configManager = new Microsoft.IdentityModel.Protocols.ConfigurationManager<OpenIdConnectConfiguration>(
-            $"{authority}/.well-known/openid-configuration",
-            new OpenIdConnectConfigurationRetriever());
-
-        var config = configManager.GetConfigurationAsync().GetAwaiter().GetResult();
-
-        var tokenValidationParameters = new TokenValidationParameters
-        {
-            ValidAudiences = audience,
-            ValidIssuers = new List<string>
-            {
-                $"https://login.microsoftonline.com/{tenantId}/",
-                $"https://login.microsoftonline.com/{tenantId}/v2.0",
-                $"https://login.windows.net/{tenantId}/",
-                $"https://login.microsoft.com/{tenantId}/",
-                $"https://sts.windows.net/{tenantId}/"
-            },
-            IssuerSigningKeys = config.SigningKeys
-        };
-
-        options.TokenValidationParameters = tokenValidationParameters;
-    });
-```
-
-Tenant ID you will find in each application, and in overview on Azure Active Directory
-
-![image](https://user-images.githubusercontent.com/11536139/231496504-9ffe18fa-31b4-4cc3-96c7-7012f96d84d4.png)
-
-Audience you will find in application in `Expose an API`, we can setup more than one, that we can authorize token generated in this scopes.
-
-![image](https://user-images.githubusercontent.com/11536139/231497206-e1d7cd8c-6fa9-4519-8a6e-ef09fe519f8f.png)
-
-
-
-Now add use it:
-```
-app.UseAuthentication();
-app.UseAuthorization();
-```
-
-
+--------------------------------------------
 
 ### ToDo 
 1. in app add scope and client app 
