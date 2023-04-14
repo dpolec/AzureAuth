@@ -1,5 +1,15 @@
 # AzureAuth
 
+ADD SOME INTRODUCTION
+
+We need start from add new application in Azure Active directory:
+
+  1. open service `Azure Active Directory`
+  2. in `Manage` section find `APP registration`
+  3. click on New registration
+
+  ![image](https://user-images.githubusercontent.com/11536139/231072183-e44da553-01e1-45a3-8362-dd5e393fa597.png)
+
 ## Requirments
 ### Azure Portal
 <details>
