@@ -1,5 +1,10 @@
 # AzureAuth
 
+1 configure app in ad
+1 configure authorizatoin in Web API 
+1 autorize from one API to another in delegated scoped
+
+
 ADD SOME INTRODUCTION
 
 Create Web API, remove example endpoint, and add for now only two endpoint to veryfied authorization:
@@ -124,28 +129,38 @@ I will be used PostMan and I add how configure this, but you can used any others
   Now we can generated token, we need login to AD using user credential
 </details>
 
+Ok, we have API, we have configured application and user in AD, and setup rest client, you can check this, all should works fine.
+
+![image](https://user-images.githubusercontent.com/11536139/232058726-aecdad31-e7e7-4f91-b2c0-154ff1ab183c.png)
+
+Great! Usually this is enought. Now I will show how we can authorize in delegated scope (user scoope) from one API to second, lets call them `Can auth API`. We have one API, we need add new one, we need add in the same way how we added first. In our rest client change configuration for new API, we need change client id and secret, leve scope, beacue we want create token to authorize in `Main API`. We still can't create token, now we need told in first API that this second can authorize, copy application id from `Can auth API` and go to `Main API`. In `Manage` section, select `Expose an API` and add again client with scoped.
+
+![image](https://user-images.githubusercontent.com/11536139/232060565-cb82aa40-98a4-48e7-a5a3-a18a587cea6c.png)
+
+Somtimes we need wait some time, when this will be propagate, and start works. When you will try now create token, all will be works fine, and request will be authorized.
+
+![image](https://user-images.githubusercontent.com/11536139/232060933-b64f59a8-805b-4ee7-b70e-21f1f0f36f84.png)
+
+Next case it will be authorize token created for application, this is very common approach when one API need get some data from other API. Create token for application is very easy, we need just send request as `POST` to url `https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token` and in body as form data:
+```
+client_id: 8b001c8d-c64b-42b5-bf37-d8e97a58110e
+client_secret: MHY8Q~Kp3kUQ~L1Rp2zWY0LpvW6xVZrzip_D3cKe
+grant_type: client_credentials
+scope: api://3245fc3f-917a-4926-a3b6-778ce877047b/.default
+```
+
+In response we received access token, and we can use it in request to authorize, but for now we have one secure breach, to explain this we need create again new app, lets call them `Can't auth API`. Now we can generete in the same way application token, and we can authorize in `Main API`. Now we can authorized in `Main API` with token generated in application, where `Main API` don't know anything about `Can't auth API` application.
 
 --------------------------------------------
 
 ### ToDo 
-1. in app add scope and client app 
 
-![image](https://user-images.githubusercontent.com/11536139/231510925-9193a3b2-9158-4862-b865-edcb2bf721d3.png)
+1. add app role (add to 1 app)
+1. example how auth request base on role in scope user
+1. example how auth request in scope of app
+1. how secure request in scope of app
+1. maybe section prepare I will don't split?
 
-3. example how auth request in scope user
-4. azure portal - configure 2 more app (can auth, can't auth)
-5. example how auth request in scope user
-6. add app role (add to 1 app)
-7. example how auth request base on role in scope user
-8. example how auth request in scope of app
-9. how secure request in scope of app
-10. maybe section prepare I will don't split?
-
-#### Done
-1. azure portal - configure app 
-1. azure portal - create user
-1. create web api
-1. add auth
 
 ### what we can do more
 1. certificate
