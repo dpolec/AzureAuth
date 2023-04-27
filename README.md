@@ -149,7 +149,63 @@ grant_type: client_credentials
 scope: api://3245fc3f-917a-4926-a3b6-778ce877047b/.default
 ```
 
-In response we received access token, and we can use it in request to authorize, but for now we have one secure breach, to explain this we need create again new app, lets call them `Can't auth API`. Now we can generete in the same way application token, and we can authorize in `Main API`. Now we can authorized in `Main API` with token generated in application, where `Main API` don't know anything about `Can't auth API` application.
+In response we received access token, and we can use it in request to authorize, but for now we have one secure breach, to undersand this we need create again new app, lets call them `Can't auth API`. Now we can generete in the same way application token, and we can authorize in `Main API`, where `Main API` don't know anything about `Can't auth API` application. To manage this we have something like `App roles`, role can be dedicated to permission only for user or application, or all. In app roles we can ach of this role we can use to separete endpoint. We can create mutiple app roles, each role can be assign to different endpoint, that we can decide which api has access to which endpoint.
+
+Ok, so lets do this, and check.
+
+First create app role
+
+![image](https://user-images.githubusercontent.com/11536139/234760378-1c10b6bc-80bc-4b7d-8727-164cd8226643.png)
+
+I call `FirstRole`, for both approach
+
+![image](https://user-images.githubusercontent.com/11536139/234760881-738da450-dcaa-4cac-b27b-4119061ea964.png)
+
+Ww need add this role to application where we want. To do this we need go to `Can Auth API` to section `API permissions` and add this role.
+
+![image](https://user-images.githubusercontent.com/11536139/234761293-24b12f65-1eed-41d8-82cd-4d81616a14bd.png)
+
+![image](https://user-images.githubusercontent.com/11536139/234761366-29bdec0f-1e9b-4fd3-a674-976ab88641aa.png)
+
+![image](https://user-images.githubusercontent.com/11536139/234761461-122221f8-8520-460c-9277-70ba6f36267e.png)
+
+in status we will see that is `Not granted for ...` 
+
+![image](https://user-images.githubusercontent.com/11536139/234761569-a6de0090-8c80-4214-89b1-14246e91c72a.png)
+
+We can add permission, but we need approved for active directory administrator, now if you are this adm then you can do this, you will be decide wich endpoit can have this role. But if you are working in bigger comapny, I supposed that you have dedicated administraotr, and we need ask him/her to grant this. In app where we need grant this in `API permissions` we will have special option to do this
+
+![image](https://user-images.githubusercontent.com/11536139/234762405-2b93a77d-1c66-4c1b-af16-14209a206b96.png)
+
+Ok, now we need to handle the role we added in the code, I will added new one endpoint to do this, we need register authorization policy, and add this policy to endpoint.
+
+```
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddAuthorization(auth =>
+    {
+        auth.AddPolicy("role-type-policy", policy => policy.RequireRole("FirstRole"));
+    })
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        ...
+    });
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.MapGet("/no-auth", () => Results.Ok());
+app.MapGet("/auth", () => Results.Ok()).RequireAuthorization();
+app.MapGet("/first-role", () => Results.Ok()).RequireAuthorization().RequireAuthorization("role-type-policy");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.Run();
+```
 
 --------------------------------------------
 
